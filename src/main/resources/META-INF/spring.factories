@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.zen.disconf.spring.boot.DisconfAutoConfiguration
