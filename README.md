@@ -6,7 +6,7 @@
 只需要关心disconfi的配置文件和配置项，省略了编写xml的麻烦
 *****
 
-### 使用步骤
+### 使用步骤(示例:[「spring-boot-starter-demo」](https://github.com/xjzrc/spring-boot-starter-demo))
 
 * 在`spring boot`项目的`pom.xml`中添加以下依赖：
 
