@@ -19,9 +19,9 @@
 </dependency>
 ```
 <br/>
-* 在application.yml添加disconf的相关配置信息
+* 在application.yml添加disconf的相关配置信息<br/>
 特别注意：配置属性名规则只支持如下样例模式，否则无法解析。如：scan-package不能写成scanPackage
-具体样例配置如下:
+<br/>具体样例配置如下:
 
 ```yml
 spring:
@@ -68,21 +68,23 @@ spring:
   ```
  
 * 需要动态推送配置写法<br/>
-    ```java
-         @Service
-         @Scope("singleton")
-         @DisconfFile(filename = "app-conf.properties")
-         public class AppConfig {
-             /**
-              * 配置项属性
-              */
-             private String property;
-             
-              @DisconfFileItem(name = "config", associateField = "property")
-               public void setProperty(String property) {
-                   this.property = property;
-               }
-      ```
+
+```java
+     @Service
+     @Scope("singleton")
+     @DisconfFile(filename = "app-conf.properties")
+     public class AppConfig {
+         /**
+          * 配置项属性
+          */
+         private String property;
+         
+          @DisconfFileItem(name = "config", associateField = "property")
+           public void setProperty(String property) {
+               this.property = property;
+           }
+     }
+  ```
     
 * springboot原有starter中需要依赖disconf配置怎么办?比如redis等 
   * 直接在disconf上面配置springboot starter中要求的配置项即可
