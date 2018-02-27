@@ -71,8 +71,8 @@ public class DisconfAutoConfiguration implements EnvironmentAware {
         loadConfig(environment);
         DisconfMgrBean disconfMgrBean = new DisconfMgrBean();
         if (StringUtils.isBlank(disconfProperties.getScanPackage())) {
-            LOGGER.error("disconf scan package is null!, please set the value in application.properties. (spring.disconf.scanPackage=com.zen)");
-            throw new RuntimeException("disconf scan package is null!, please set the value in application.properties. (spring.disconf.scanPackage=com.zen)");
+            LOGGER.error("disconf scan package is null!, please set the value in application.properties. (spring.disconf.scan-package=com.zen)");
+            throw new RuntimeException("disconf scan package is null!, please set the value in application.properties. (spring.disconf.scan-package=com.zen)");
         }
         disconfMgrBean.setScanPackage(disconfProperties.getScanPackage());
         return disconfMgrBean;
