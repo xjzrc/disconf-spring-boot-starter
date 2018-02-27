@@ -16,7 +16,7 @@ public @interface DisconfConfigAnnotation {
 
     String springBootName();
 
-    String disconName();
+    String disconfName();
 
     String defaultValue() default "";
 }

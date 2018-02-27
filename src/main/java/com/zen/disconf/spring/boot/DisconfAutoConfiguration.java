@@ -48,7 +48,7 @@ public class DisconfAutoConfiguration implements EnvironmentAware {
                 // 获取配置属性的值
                 String value = environment.getProperty(DisconfProperties.DISCONF_PROPERTIES_PREFIX + "." + config.springBootName(), config.defaultValue());
                 // 设置到系统环境变量中，给disClientConfig解析
-                System.setProperty(config.disconName(), value);
+                System.setProperty(config.disconfName(), value);
                 try {
                     field.setAccessible(true);
                     ClassUtils.setFieldValeByType(field, disconfProperties, value);
