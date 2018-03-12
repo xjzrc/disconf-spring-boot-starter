@@ -10,14 +10,24 @@ import com.zen.disconf.spring.boot.annotation.DisconfConfigAnnotation;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.PropertiesPropertySource;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * disconf自动配置
@@ -27,13 +37,14 @@ import java.lang.reflect.Field;
  * @since 1.0.0
  */
 @Configuration
+@ConditionalOnClass(DisconfMgrBean.class)
 public class DisconfAutoConfiguration implements EnvironmentAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DisconfAutoConfiguration.class);
 
     private static DisconfProperties disconfProperties = new DisconfProperties();
 
-    private Environment environment;
+    private ConfigurableEnvironment environment;
 
     /**
      * 加载配置
@@ -93,10 +104,11 @@ public class DisconfAutoConfiguration implements EnvironmentAware {
      *
      * @return ReloadablePropertiesFactoryBean
      */
-    @Bean
+    @Bean("disconfUnReloadablePropertiesFactoryBean")
+    @ConditionalOnExpression("'${spring.disconf.un-reload-files}'.length() > 0")
     public ReloadablePropertiesFactoryBean disconfUnReloadablePropertiesFactoryBean() {
         ReloadablePropertiesFactoryBean factoryBean = new ReloadablePropertiesFactoryBean();
-        factoryBean.setLocations(StringUtil.parseStringToStringList(disconfProperties.getUnReloadFiles(), ","));
+        factoryBean.setLocations(getFileNames(disconfProperties.getUnReloadFiles()));
         return factoryBean;
     }
 
@@ -107,11 +119,15 @@ public class DisconfAutoConfiguration implements EnvironmentAware {
      * @throws IOException IOException
      */
     @Bean
-    public PropertyPlaceholderConfigurer disconfPropertyPlaceholderConfigurer() throws IOException {
+    @ConditionalOnBean(name = "disconfUnReloadablePropertiesFactoryBean")
+    public PropertyPlaceholderConfigurer disconfPropertyPlaceholderConfigurer(
+            @Qualifier("disconfUnReloadablePropertiesFactoryBean") ReloadablePropertiesFactoryBean factoryBean) throws IOException {
         PropertyPlaceholderConfigurer configurer = new PropertyPlaceholderConfigurer();
+        configurer.setOrder(1);
         configurer.setIgnoreResourceNotFound(true);
         configurer.setIgnoreUnresolvablePlaceholders(true);
-        configurer.setProperties(disconfUnReloadablePropertiesFactoryBean().getObject());
+        configurer.setProperties(factoryBean.getObject());
+        addPropertiesPropertySource("disconfUnReloadableProperties", factoryBean.getObject());
         return configurer;
     }
 
@@ -120,10 +136,11 @@ public class DisconfAutoConfiguration implements EnvironmentAware {
      *
      * @return ReloadablePropertiesFactoryBean
      */
-    @Bean
+    @Bean("disconfReloadablePropertiesFactoryBean")
+    @ConditionalOnExpression("'${spring.disconf.reload-files}'.length() > 0")
     public ReloadablePropertiesFactoryBean disconfReloadablePropertiesFactoryBean() {
         ReloadablePropertiesFactoryBean factoryBean = new ReloadablePropertiesFactoryBean();
-        factoryBean.setLocations(StringUtil.parseStringToStringList(disconfProperties.getReloadFiles(), ","));
+        factoryBean.setLocations(getFileNames(disconfProperties.getReloadFiles()));
         return factoryBean;
     }
 
@@ -134,16 +151,42 @@ public class DisconfAutoConfiguration implements EnvironmentAware {
      * @throws IOException IOException
      */
     @Bean
-    public ReloadingPropertyPlaceholderConfigurer disconfReloadingPropertyPlaceholderConfigurer() throws IOException {
+    @ConditionalOnBean(name = "disconfReloadablePropertiesFactoryBean")
+    public ReloadingPropertyPlaceholderConfigurer disconfReloadingPropertyPlaceholderConfigurer(
+            @Qualifier("disconfReloadablePropertiesFactoryBean") ReloadablePropertiesFactoryBean factoryBean) throws IOException {
         ReloadingPropertyPlaceholderConfigurer configurer = new ReloadingPropertyPlaceholderConfigurer();
+        configurer.setOrder(1);
         configurer.setIgnoreResourceNotFound(true);
         configurer.setIgnoreUnresolvablePlaceholders(true);
-        configurer.setProperties(disconfReloadablePropertiesFactoryBean().getObject());
+        configurer.setProperties(factoryBean.getObject());
+        addPropertiesPropertySource("disconfReloadableProperties", factoryBean.getObject());
         return configurer;
+    }
+
+    /**
+     * 获取文件列表集合
+     *
+     * @param files 文件
+     * @return List<String>
+     */
+    private List<String> getFileNames(String files) {
+        return StringUtil.parseStringToStringList(files, ",");
     }
 
     @Override
     public void setEnvironment(Environment environment) {
-        this.environment = environment;
+        this.environment = (ConfigurableEnvironment) environment;
     }
+
+    /**
+     * 增加环境变量配置
+     *
+     * @param name   配置文件名
+     * @param source 文件源
+     */
+    private void addPropertiesPropertySource(String name, Properties source) {
+        PropertiesPropertySource propertiesPropertySource = new PropertiesPropertySource(name, source);
+        environment.getPropertySources().addLast(propertiesPropertySource);
+    }
+
 }
