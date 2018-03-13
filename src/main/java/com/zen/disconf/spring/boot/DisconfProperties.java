@@ -1,7 +1,14 @@
 package com.zen.disconf.spring.boot;
 
+import com.baidu.disconf.client.support.utils.ClassUtils;
 import com.zen.disconf.spring.boot.annotation.DisconfConfigAnnotation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
+
+import java.lang.reflect.Field;
 
 /**
  * Disconf属性配置
@@ -13,7 +20,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(DisconfProperties.DISCONF_PROPERTIES_PREFIX)
 public class DisconfProperties {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DisconfProperties.class);
+
     public static final String DISCONF_PROPERTIES_PREFIX = "spring.disconf";
+
+    public DisconfProperties(Environment environment) {
+        loadConfig(environment);
+    }
 
     /**
      * disconf包扫描路径
@@ -100,7 +113,7 @@ public class DisconfProperties {
      * 用户定义的下载文件夹, 远程文件下载后会放在这里。
      * 注意，此文件夹必须有有权限，否则无法下载到这里
      */
-    @DisconfConfigAnnotation(springBootName = "user-define-download-dir", disconfName = "disconf.user_define_download_dir", defaultValue = "./disconf/downloa")
+    @DisconfConfigAnnotation(springBootName = "user-define-download-dir", disconfName = "disconf.user_define_download_dir", defaultValue = "./disconf/download")
     private String userDefineDownloadDir = "./disconf/download";
 
     /**
@@ -227,5 +240,29 @@ public class DisconfProperties {
 
     public void setEnableLocalDownloadDirInClassPath(boolean enableLocalDownloadDirInClassPath) {
         this.enableLocalDownloadDirInClassPath = enableLocalDownloadDirInClassPath;
+    }
+
+    /**
+     * 加载配置
+     *
+     * @param environment 配置环境
+     */
+    private void loadConfig(Environment environment) {
+        Field[] fields = this.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            if (field.isAnnotationPresent(DisconfConfigAnnotation.class)) {
+                DisconfConfigAnnotation config = field.getAnnotation(DisconfConfigAnnotation.class);
+                // 获取配置属性的值
+                String value = environment.getProperty(DisconfProperties.DISCONF_PROPERTIES_PREFIX + "." + config.springBootName(), config.defaultValue());
+                // 设置到系统环境变量中，给disClientConfig解析
+                System.setProperty(config.disconfName(), value);
+                try {
+                    field.setAccessible(true);
+                    ClassUtils.setFieldValeByType(field, this, value);
+                } catch (Exception e) {
+                    LOGGER.error(String.format("invalid config: %s", config.springBootName()), e);
+                }
+            }
+        }
     }
 }

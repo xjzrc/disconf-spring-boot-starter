@@ -26,6 +26,7 @@ import org.springframework.core.env.PropertiesPropertySource;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -43,47 +44,22 @@ public class DisconfAutoConfiguration implements EnvironmentAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DisconfAutoConfiguration.class);
 
-    private static DisconfProperties disconfProperties = new DisconfProperties();
+    private DisconfProperties disconfProperties;
 
     private ConfigurableEnvironment environment;
 
     @Override
     public void setEnvironment(Environment environment) {
         this.environment = (ConfigurableEnvironment) environment;
-    }
-
-    /**
-     * 加载配置
-     *
-     * @param environment 配置环境
-     */
-    private void loadConfig(Environment environment) {
-        Field[] fields = disconfProperties.getClass().getDeclaredFields();
-        for (Field field : fields) {
-            if (field.isAnnotationPresent(DisconfConfigAnnotation.class)) {
-                DisconfConfigAnnotation config = field.getAnnotation(DisconfConfigAnnotation.class);
-                // 获取配置属性的值
-                String value = environment.getProperty(DisconfProperties.DISCONF_PROPERTIES_PREFIX + "." + config.springBootName(), config.defaultValue());
-                // 设置到系统环境变量中，给disClientConfig解析
-                System.setProperty(config.disconfName(), value);
-                try {
-                    field.setAccessible(true);
-                    ClassUtils.setFieldValeByType(field, disconfProperties, value);
-                } catch (Exception e) {
-                    LOGGER.error(String.format("invalid config: %s", config.springBootName()), e);
-                }
-            }
-        }
+        this.disconfProperties = new DisconfProperties(this.environment);
         //加载Disconf 系统自带的配置
-        loadSysConfig();
+        loadDisClientSysConfig();
     }
 
     /**
      * 加载Disconf 系统自带的配置
-     *
-     * @throws Exception
      */
-    private void loadSysConfig() {
+    private void loadDisClientSysConfig() {
         //加载Disconf 系统自带的配置
         DisClientSysConfig disClientSysConfig = DisClientSysConfig.getInstance();
         try {
@@ -103,8 +79,6 @@ public class DisconfAutoConfiguration implements EnvironmentAware {
      */
     @Bean(destroyMethod = "destroy")
     public DisconfMgrBean disconfMgrBean() {
-        //加载用户配置
-        loadConfig(environment);
         DisconfMgrBean disconfMgrBean = new DisconfMgrBean();
         if (StringUtils.isBlank(disconfProperties.getScanPackage())) {
             LOGGER.error("disconf scan package is null!, please set the value in application.properties. (spring.disconf.scan-package=com.zen)");
@@ -195,7 +169,15 @@ public class DisconfAutoConfiguration implements EnvironmentAware {
      * @return List<String>
      */
     private List<String> getFileNames(String files) {
-        return StringUtil.parseStringToStringList(files, ",");
+        List<String> fileList = StringUtil.parseStringToStringList(files, ",");
+        if (disconfProperties.isEnableLocalDownloadDirInClassPath()) {
+            return fileList;
+        }
+        List<String> newFileList = new ArrayList<>(fileList.size());
+        for (String file : fileList) {
+            newFileList.add("file:" + disconfProperties.getUserDefineDownloadDir() + "/" + file);
+        }
+        return newFileList;
     }
 
     /**
