@@ -28,9 +28,9 @@ spring:
   disconf:
     #disconf包扫描路径
     scan-package: com.zen.spring.boot.demo.disconf
-    #不需要自动reload的配置文件
+    #不需要自动reload的配置文件(必须配置,没有留空)
     un-reload-files: myserver.properties
-    #需要自动reload的配置文件
+    #需要自动reload的配置文件(必须配置,没有留空)
     reload-files: autoconfig.properties,autoconfig2.properties,myserver_slave.properties,testJson.json,testXml2.xml
     #是否使用远程配置文件，true(默认)会从远程获取配置 false则直接获取本地配置
     enable-remote-conf: true
