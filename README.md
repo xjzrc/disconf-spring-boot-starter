@@ -55,8 +55,8 @@ spring:
     conf-server-url-retry-sleep-seconds: 1
     #用户定义的下载文件夹, 远程文件下载后会放在这里。注意，此文件夹必须有有权限，否则无法下载到这里
     user-define-download-dir: /app/spring-boot/disconf/disconf-spring-boot-starter-demo
-    #下载的文件会被迁移到classpath根路径下，强烈建议将此选项置为 true(默认是true)
-    enable-local-download-dir-in-class-path: true
+    #下载的文件会被迁移到classpath根路径下(默认是false)
+    enable-local-download-dir-in-class-path: false
 ```
 
 <br/>

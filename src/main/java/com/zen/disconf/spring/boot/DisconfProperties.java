@@ -119,8 +119,8 @@ public class DisconfProperties {
     /**
      * 下载的文件会被迁移到classpath根路径下，强烈建议将此选项置为 true(默认是true)
      */
-    @DisconfConfigAnnotation(springBootName = "enable-local-download-dir-in-class-path", disconfName = "disconf.enable_local_download_dir_in_class_path", defaultValue = "true")
-    private boolean enableLocalDownloadDirInClassPath = true;
+    @DisconfConfigAnnotation(springBootName = "enable-local-download-dir-in-class-path", disconfName = "disconf.enable_local_download_dir_in_class_path", defaultValue = "false")
+    private boolean enableLocalDownloadDirInClassPath = false;
 
     public String getScanPackage() {
         return scanPackage;
