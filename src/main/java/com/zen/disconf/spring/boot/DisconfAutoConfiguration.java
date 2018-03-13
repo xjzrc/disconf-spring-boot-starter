@@ -46,6 +46,11 @@ public class DisconfAutoConfiguration implements EnvironmentAware {
 
     private ConfigurableEnvironment environment;
 
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = (ConfigurableEnvironment) environment;
+    }
+
     /**
      * 加载配置
      *
@@ -171,11 +176,6 @@ public class DisconfAutoConfiguration implements EnvironmentAware {
      */
     private List<String> getFileNames(String files) {
         return StringUtil.parseStringToStringList(files, ",");
-    }
-
-    @Override
-    public void setEnvironment(Environment environment) {
-        this.environment = (ConfigurableEnvironment) environment;
     }
 
     /**
