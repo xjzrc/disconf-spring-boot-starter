@@ -111,9 +111,11 @@ public class DisconfAutoConfiguration implements EnvironmentAware {
         return factoryBean;
     }
 
+
     /**
      * 当配置文件改变，不会自动reload到系统
      *
+     * @param factoryBean 不会自动reload配置工厂
      * @return PropertyPlaceholderConfigurer
      * @throws IOException IOException
      */
@@ -146,6 +148,7 @@ public class DisconfAutoConfiguration implements EnvironmentAware {
     /**
      * 当配置文件改变，会自动reload到系统
      *
+     * @param factoryBean 会自动reload配置工厂
      * @return ReloadingPropertyPlaceholderConfigurer
      * @throws IOException IOException
      */
