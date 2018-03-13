@@ -4,6 +4,7 @@ import com.baidu.disconf.client.DisconfMgrBean;
 import com.baidu.disconf.client.DisconfMgrBeanSecond;
 import com.baidu.disconf.client.addons.properties.ReloadablePropertiesFactoryBean;
 import com.baidu.disconf.client.addons.properties.ReloadingPropertyPlaceholderConfigurer;
+import com.baidu.disconf.client.config.DisClientSysConfig;
 import com.baidu.disconf.client.support.utils.ClassUtils;
 import com.baidu.disconf.client.support.utils.StringUtil;
 import com.zen.disconf.spring.boot.annotation.DisconfConfigAnnotation;
@@ -73,6 +74,25 @@ public class DisconfAutoConfiguration implements EnvironmentAware {
                 }
             }
         }
+        //加载Disconf 系统自带的配置
+        loadSysConfig();
+    }
+
+    /**
+     * 加载Disconf 系统自带的配置
+     *
+     * @throws Exception
+     */
+    private void loadSysConfig() {
+        //加载Disconf 系统自带的配置
+        DisClientSysConfig disClientSysConfig = DisClientSysConfig.getInstance();
+        try {
+            disClientSysConfig.loadConfig(null);
+        } catch (Exception e) {
+            LOGGER.error(e.toString(), e);
+        }
+        //将系统下载目录替换成用户配置的下载目录
+        disClientSysConfig.LOCAL_DOWNLOAD_DIR = disconfProperties.getUserDefineDownloadDir();
     }
 
     /**
@@ -83,7 +103,7 @@ public class DisconfAutoConfiguration implements EnvironmentAware {
      */
     @Bean(destroyMethod = "destroy")
     public DisconfMgrBean disconfMgrBean() {
-        //加载配置
+        //加载用户配置
         loadConfig(environment);
         DisconfMgrBean disconfMgrBean = new DisconfMgrBean();
         if (StringUtils.isBlank(disconfProperties.getScanPackage())) {
