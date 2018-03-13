@@ -25,6 +25,9 @@
 
 ```yml
 spring:
+  aop:
+    #使你的项目支持 cglib的aop
+    proxy-target-class: true
   disconf:
     #disconf包扫描路径
     scan-package: com.zen.spring.boot.demo.disconf
