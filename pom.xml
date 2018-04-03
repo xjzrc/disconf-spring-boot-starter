@@ -7,7 +7,7 @@
 
     <groupId>com.github.xjzrc.spring.boot</groupId>
     <artifactId>disconf-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <name>disconf-spring-boot-starter</name>
     <description>Disconf Spring Boot Starter</description>

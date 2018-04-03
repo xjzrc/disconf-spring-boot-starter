@@ -5,9 +5,7 @@ import com.baidu.disconf.client.DisconfMgrBeanSecond;
 import com.baidu.disconf.client.addons.properties.ReloadablePropertiesFactoryBean;
 import com.baidu.disconf.client.addons.properties.ReloadingPropertyPlaceholderConfigurer;
 import com.baidu.disconf.client.config.DisClientSysConfig;
-import com.baidu.disconf.client.support.utils.ClassUtils;
 import com.baidu.disconf.client.support.utils.StringUtil;
-import com.zen.disconf.spring.boot.annotation.DisconfConfigAnnotation;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,16 +16,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertiesPropertySource;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -104,13 +99,12 @@ public class DisconfAutoConfiguration implements EnvironmentAware {
      * @return ReloadablePropertiesFactoryBean
      */
     @Bean("disconfUnReloadablePropertiesFactoryBean")
-    @ConditionalOnExpression("'${spring.disconf.un-reload-files}'.length() > 0")
+    @ConditionalOnExpression("'${spring.disconf.un-reload-files}' != '' and !'${spring.disconf.un-reload-files}'.startsWith('${')")
     public ReloadablePropertiesFactoryBean disconfUnReloadablePropertiesFactoryBean() {
         ReloadablePropertiesFactoryBean factoryBean = new ReloadablePropertiesFactoryBean();
         factoryBean.setLocations(getFileNames(disconfProperties.getUnReloadFiles()));
         return factoryBean;
     }
-
 
     /**
      * 当配置文件改变，不会自动reload到系统
@@ -138,7 +132,7 @@ public class DisconfAutoConfiguration implements EnvironmentAware {
      * @return ReloadablePropertiesFactoryBean
      */
     @Bean("disconfReloadablePropertiesFactoryBean")
-    @ConditionalOnExpression("'${spring.disconf.reload-files}'.length() > 0")
+    @ConditionalOnExpression("'${spring.disconf.reload-files}' != '' and !'${spring.disconf.reload-files}'.startsWith('${')")
     public ReloadablePropertiesFactoryBean disconfReloadablePropertiesFactoryBean() {
         ReloadablePropertiesFactoryBean factoryBean = new ReloadablePropertiesFactoryBean();
         factoryBean.setLocations(getFileNames(disconfProperties.getReloadFiles()));
