@@ -10,7 +10,7 @@
 
 * 在`spring boot`项目的`pom.xml`中添加以下依赖：
 
-根据实际情况依赖最新版本
+根据实际情况依赖最新版本（当前最新版本1.0.1）
 ```xml
 <dependency>
     <groupId>com.github.xjzrc.spring.boot</groupId>
