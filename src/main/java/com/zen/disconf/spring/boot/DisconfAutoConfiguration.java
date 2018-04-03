@@ -30,7 +30,7 @@ import java.util.Properties;
  * disconf自动配置
  *
  * @author xinjingziranchan@gmail.com
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 @Configuration
